@@ -1,0 +1,33 @@
+@{
+    Layout = "_Layout";
+}
+
+<nav class="navbar navbar-expand-md navbar-light bg-light">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto">
+                <li><a class="nav-link" asp-controller="Club" asp-action="List">Clubs</a></li>
+                <li><a class="nav-link" asp-controller="Class" asp-action="List">Classes</a></li>
+                <li><a class="nav-link" asp-controller="Membership" asp-action="List">Membership</a></li>
+                <li><a class="nav-link" asp-controller="PrivateClass" asp-action="List">Private Training</a></li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li><a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container mt-4">
+    @RenderBody()
+</main>
+
+<footer class="text-center mt-4">
+    <a asp-action="Contact">Contact us</a> |
+    <a asp-action="Privacy">Privacy Policy</a> |
+    <a asp-action="Terms">Terms & Conditions</a> |
+    <a asp-action="CookiePolicy">Cookies</a>
+</footer>
