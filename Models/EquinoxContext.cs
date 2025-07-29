@@ -62,7 +62,7 @@ namespace Equinox.Models
 
            
 
-            // ✅ Seed ONLY TWO EquinoxClasses as required
+            // ✅ Seed EquinoxClasses as required
             modelBuilder.Entity<EquinoxClass>().HasData(
                 new EquinoxClass
                 {
