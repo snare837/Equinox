@@ -3,15 +3,6 @@
     Layout = "_MainLayout";
     ViewBag.Title = "Equinox Home";
 }
-
-<!-- 🔔 Feedback message -->
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-info mt-3 text-center">
-        @TempData["Message"]
-    </div>
-}
-
 <!-- 🔷 Welcome Banner -->
 <div
     style="background-image: url('/images/bg.jpg'); height: 400px; background-size: cover; display: flex; align-items: center; justify-content: center;">
