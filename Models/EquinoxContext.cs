@@ -85,6 +85,17 @@ namespace Equinox.Models
                     ClubId = 2,
                     ClassCategoryId = 2,
                     UserId = 2
+                },
+                   new EquinoxClass
+                {
+                    EquinoxClassId = 3,
+                    Name = "Boxing Basics",
+                    ClassPicture = "boxing1.jpg",
+                    ClassDay = "Friday",
+                    Time = "5 PM – 6 PM",
+                    ClubId = 3,
+                    ClassCategoryId = 3,
+                    UserId = 3
                 }
             );
         }
