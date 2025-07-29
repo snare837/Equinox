@@ -1,13 +1,92 @@
-﻿@{
+﻿@model Equinox.Models.ViewModels.EquinoxViewModel
+@{
     Layout = "_MainLayout";
     ViewBag.Title = "Equinox Home";
 }
 
-<div style="background-image: url('/images/bg.jpg'); height: 400px; background-size: cover; display: flex; align-items: center; justify-content: center;">
+<!-- 🔔 Feedback message -->
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info mt-3 text-center">
+        @TempData["Message"]
+    </div>
+}
+
+<!-- 🔷 Welcome Banner -->
+<div
+    style="background-image: url('/images/bg.jpg'); height: 400px; background-size: cover; display: flex; align-items: center; justify-content: center;">
     <h1 style="color: white; font-size: 3rem; text-shadow: 2px 2px 4px #000;">Welcome to Equinox Fitness Club</h1>
 </div>
 
+<!-- 🔷 About Us -->
 <div class="container mt-4">
-    <h2>About Us</h2>
-    <p>Equinox is a premier fitness center offering high-end classes, private training, and personalized memberships to help you meet your wellness goals.</p>
+    <div class="container mt-4">
+        <h2 class="mb-4">Available Classes</h2>
+
+        <form method="get" asp-action="index">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label>Club:</label>
+                    <select name="club" class="form-select">
+                        <option value="All" selected="@(Model.ActiveClubName == "All")">All</option>
+                        @foreach (var club in Model.AllClubs)
+                        {
+                            <option value="@club.Name" selected="@(Model.ActiveClubName == club.Name)">
+                                @club.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Category:</label>
+                    <select name="category" class="form-select">
+                        <option value="All" selected="@(Model.ActiveCategoryName == "All")">All</option>
+                        @foreach (var cat in Model.AllCategories)
+                        {
+                            <option value="@cat.Name" selected="@(Model.ActiveCategoryName == cat.Name)">
+                                @cat.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4 mt-4">
+                    <button type="submit" class="btn btn-primary">Apply Filter</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="row">
+    @foreach (var cls in Model.AllClasses)
+    {
+        <div class="col-md-4 mb-4 d-flex align-items-stretch">
+            <div class="card shadow-sm d-flex flex-column w-100">
+                <!-- 📸 Image with fixed height -->
+                <img src="~/images/@cls.ClassPicture"
+                     class="card-img-top"
+                     alt="@cls.Name"
+                     style="height: 220px; object-fit: cover;" />
+
+                <!-- 📋 Text content -->
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@cls.Name</h5>
+                    <p class="card-text mb-4">
+                        <strong>Day:</strong> @cls.ClassDay <br />
+                        <strong>Time:</strong> @cls.Time <br />
+                        <strong>Club:</strong> @cls.Club.Name <br />
+                        <strong>Category:</strong> @cls.ClassCategory.Name
+                    </p>
+
+                    <!-- 📎 Button pinned to bottom -->
+                    <div class="mt-auto">
+                        <a asp-action="Details"
+                           asp-controller="Home"
+                           asp-route-id="@cls.EquinoxClassId"
+                           class="btn btn-primary w-100">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>

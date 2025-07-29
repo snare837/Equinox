@@ -1,0 +1,40 @@
+@model Equinox.Models.EquinoxClass
+@{
+    ViewData["Title"] = "Class Details";
+    Layout = "_MainLayout"; // Use _MainLayout as per your Phase 1 structure
+}
+
+<div class="container mt-5">
+    <h2>@Model.Name</h2>
+    <div class="row">
+        <!-- 📸 Class Image -->
+        <div class="col-md-5">
+            <img src="~/images/@Model.ClassPicture" class="img-fluid rounded" alt="@Model.Name" />
+        </div>
+
+        <!-- 🧾 Class Info + Actions -->
+        <div class="col-md-7">
+            <p><strong>Class Day:</strong> @Model.ClassDay</p>
+            <p><strong>Time:</strong> @Model.Time</p>
+            <p><strong>Club:</strong> @Model.Club.Name</p>
+            <p><strong>Category:</strong> @Model.ClassCategory.Name</p>
+            <p><strong>Coach:</strong> @Model.User.Name</p>
+
+            <div class="mt-4 d-flex gap-2">
+
+
+
+                <!-- ✅ Book -->
+                <form asp-action="BookClass" asp-controller="Home" asp-route-id="@Model.EquinoxClassId" method="post"
+                    style="display:inline;">
+                <button type="submit" class="btn btn-success">Book This Class</button>
+                </form>
+               
+                <!-- 🔙 Back to Classes -->
+                <a asp-action="index" asp-controller="Home" class="btn btn-secondary">Back to Classes</a>
+
+
+            </div>
+        </div>
+    </div>
+</div>
