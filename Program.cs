@@ -1,38 +1,34 @@
-using Equinox.Models;
 using Microsoft.EntityFrameworkCore;
+using Equinox.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddSession();
+// === Register services ===
+builder.Services.AddMemoryCache();          // Required for session
+builder.Services.AddSession();              // Basic session setup
+builder.Services.AddControllersWithViews(); // MVC
 
 builder.Services.AddDbContext<EquinoxContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("EquinoxContext")));
 
 var app = builder.Build();
 
-// Ensure database is created and migrated
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<EquinoxContext>();
-    context.Database.Migrate(); // Ensures migration is applied
-}
-
-// Configure the HTTP request pipeline.
+// === Middleware pipeline ===
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    app.UseHsts(); // Optional, but included in NFLTeams
 }
+
+app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
-// ✅ Enable session
-app.UseSession();
-
+app.UseSession();       // Between routing and auth
 app.UseAuthorization();
 
-// Admin area route
+// === Routing ===
 app.MapAreaControllerRoute(
     name: "admin",
     areaName: "Admin",
@@ -43,10 +39,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-
-
-
-
 
 
 

@@ -1,40 +1,30 @@
-@model Equinox.Models.EquinoxClass
+@model Equinox.Models.ViewModels.EquinoxViewModel
+
 @{
     ViewData["Title"] = "Class Details";
-    Layout = "_MainLayout"; 
 }
 
 <div class="container mt-5">
-    <h2>@Model.Name</h2>
     <div class="row">
-        <!-- 📸 Class Image -->
-        <div class="col-md-5">
-            <img src="~/images/@Model.ClassPicture" class="img-fluid rounded" alt="@Model.Name" />
+        <!-- Image -->
+        <div class="col-md-6">
+            <img src="~/images/@Model.EquinoxClass.ClassPicture" class="img-fluid rounded shadow" alt="@Model.EquinoxClass.Name" />
         </div>
 
-        <!-- 🧾 Class Info + Actions -->
-        <div class="col-md-7">
-            <p><strong>Class Day:</strong> @Model.ClassDay</p>
-            <p><strong>Time:</strong> @Model.Time</p>
-            <p><strong>Club:</strong> @Model.Club.Name</p>
-            <p><strong>Category:</strong> @Model.ClassCategory.Name</p>
-            <p><strong>Coach:</strong> @Model.User.Name</p>
-
-            <div class="mt-4 d-flex gap-2">
-
+        <!-- Details -->
+        <div class="col-md-6">
+            <h2>@Model.EquinoxClass.Name</h2>
+            <p><strong>Day:</strong> @Model.EquinoxClass.ClassDay</p>
+            <p><strong>Time:</strong> @Model.EquinoxClass.Time</p>
+            <p><strong>Club:</strong> @Model.EquinoxClass.Club.Name</p>
+            <p><strong>Category:</strong> @Model.EquinoxClass.ClassCategory.Name</p>
+            <p><strong>Coach:</strong> @Model.EquinoxClass.User?.Name
 
 
-                <!-- ✅ Book -->
-                <form asp-action="BookClass" asp-controller="Home" asp-route-id="@Model.EquinoxClassId" method="post"
-                    style="display:inline;">
-                <button type="submit" class="btn btn-success">Book This Class</button>
-                </form>
-               
-                <!-- 🔙 Back to Classes -->
-                <a asp-action="index" asp-controller="Home" class="btn btn-secondary">Back to Classes</a>
-
-
-            </div>
+            <form asp-controller="Home" asp-action="BookClass" asp-route-id="@Model.EquinoxClass.EquinoxClassId" method="post">
+                <button type="submit" class="btn btn-primary mt-3">Book This Class</button>
+            </form>
         </div>
     </div>
 </div>
+

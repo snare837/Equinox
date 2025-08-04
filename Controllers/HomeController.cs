@@ -1,109 +1,164 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Linq;
+
 using Equinox.Models;
 using Equinox.Models.ViewModels;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace Equinox.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly EquinoxContext context;
 
-        private readonly EquinoxContext _context;
-        private const string BookingCookieKey = "Bookings";
-        private const string FilterSelectedClubKey = "FilterSelectedClub";
-        private const string FilterSelectedCategoryKey = "FilterSelectedCategory";
-
-        public HomeController(EquinoxContext context)
+        public HomeController(EquinoxContext ctx)
         {
-            _context = context;
+            context = ctx;
+        }
+        
+        public IActionResult Index(EquinoxViewModel model)
+        {
+            var session = new EquinoxSession(HttpContext.Session);
+            session.SetActiveClub(model.ActiveClubName);
+            session.SetActiveCategory(model.ActiveCategoryName);
+
+            List<int> bookings = session.GetMyBookings();
+            if (bookings == null || bookings.Count == 0)
+            {
+                var cookies = new EquinoxCookie(Request.Cookies, Response.Cookies);
+                bookings = cookies.GetMyBookings();
+                if (bookings.Count > 0)
+                {
+                    session.SetMyBookings(bookings);
+                }
+            }
+
+        var allClubs = context.Clubs.OrderBy(c => c.Name).ToList();
+        if (model.ActiveClubName != "All")
+         {
+          var activeClub = allClubs.FirstOrDefault(c => c.Name == model.ActiveClubName);
+        if (activeClub != null)
+         {
+        allClubs.Remove(activeClub);
+        allClubs.Insert(0, activeClub);
+         }
+         }
+           model.AllClubs = allClubs;
+
+            List<ClassCategory> allCategories;
+
+         if (model.ActiveClubName != "All")
+        {
+          allCategories = context.EquinoxClasses
+          .Where(c => c.Club.Name == model.ActiveClubName)
+          .Select(c => c.ClassCategory)
+          .Distinct()
+          .OrderBy(c => c.Name)
+          .ToList();
+        }
+          else
+        {
+          allCategories = context.ClassCategories.OrderBy(c => c.Name).ToList();
         }
 
-        public IActionResult Index(string club, string category)
-        {
+             if (model.ActiveCategoryName != "All")
+              {
+                var activeCat = allCategories.FirstOrDefault(c => c.Name == model.ActiveCategoryName);
+              if (activeCat != null)
+              {
+        allCategories.Remove(activeCat);
+        allCategories.Insert(0, activeCat);
+            }
+          }
+        model.AllCategories = allCategories;
 
-            club ??= HttpContext.Session.GetString(FilterSelectedClubKey) ?? "All";
-            HttpContext.Session.SetString(FilterSelectedClubKey, club);
 
-            category ??= HttpContext.Session.GetString(FilterSelectedCategoryKey) ?? "All";      
-            HttpContext.Session.SetString(FilterSelectedCategoryKey, category);
-
-            var model = new EquinoxViewModel
-            {
-                AllClubs = _context.Clubs.ToList(),
-                AllCategories = _context.ClassCategories.ToList(),
-                ActiveClubName = club,
-                ActiveCategoryName = category
-            };
-
-            IQueryable<EquinoxClass> query = _context.EquinoxClasses
+            IQueryable<EquinoxClass> query = context.EquinoxClasses
                 .Include(c => c.Club)
                 .Include(c => c.ClassCategory)
                 .Include(c => c.User);
 
-            if (club != "All")
-                query = query.Where(c => c.Club.Name == club);
+            if (model.ActiveClubName != "All")
+            {
+                query = query.Where(c => c.Club.Name == model.ActiveClubName);
+            }
 
-            if (category != "All")
-                query = query.Where(c => c.ClassCategory.Name == category);
+            if (model.ActiveCategoryName != "All")
+            {
+                query = query.Where(c => c.ClassCategory.Name == model.ActiveCategoryName);
+            }
 
             model.AllClasses = query.ToList();
-
-            var bookings = HttpContext.Request.GetObjectFromJson<List<int>>(BookingCookieKey) ?? new List<int>();
             ViewBag.CartCount = bookings.Count;
 
             return View(model);
         }
 
-        [HttpPost]
-        public IActionResult Filter(string club, string category)
+       public IActionResult Details(int id)
         {
-            HttpContext.Session.SetString(FilterSelectedClubKey, club);
-            HttpContext.Session.SetString(FilterSelectedCategoryKey, category);
-            return RedirectToAction("index");
-        }
+    var session = new EquinoxSession(HttpContext.Session);
 
-        public IActionResult Details(int id)
-        {
-            var equinoxClass = _context.EquinoxClasses
-                .Include(c => c.Club)
-                .Include(c => c.ClassCategory)
-                .Include(c => c.User)
-                .FirstOrDefault(c => c.EquinoxClassId == id);
+    var classData = context.EquinoxClasses
+        .Include(c => c.Club)
+        .Include(c => c.ClassCategory)
+        .Include(c => c.User)
+        .FirstOrDefault(c => c.EquinoxClassId == id);
 
-            if (equinoxClass == null)
-                return NotFound();
+    if (classData == null)
+    {
+    return NotFound(); // or handle appropriately
+    }
 
-            ViewBag.CartCount = HttpContext.Request.GetObjectFromJson<List<int>>(BookingCookieKey)?.Count ?? 0;
+     var model = new EquinoxViewModel
+   {
+    EquinoxClass = classData,
+    ActiveClubName = session.GetActiveClub(),
+    ActiveCategoryName = session.GetActiveCategory()
+    };
 
-            return View(equinoxClass);
-        }
+
+    ViewBag.CartCount = session.GetMyBookings()?.Count ?? 0;
+
+    return View(model);
+    }
+
 
         [HttpPost]
         public IActionResult BookClass(int id)
         {
-            
-            var bookings = HttpContext.Request.GetObjectFromJson<List<int>>(BookingCookieKey) ?? new List<int>();
-            bool exists = bookings.Contains(id);
-            if (!exists)
+            var session = new EquinoxSession(HttpContext.Session);
+            var cookies = new EquinoxCookie(Request.Cookies, Response.Cookies);
+
+
+            var bookings = session.GetMyBookings() ?? new List<int>();
+
+            if (!bookings.Contains(id))
             {
                 bookings.Add(id);
-                HttpContext.Response.SetObjectAsJson(BookingCookieKey, bookings);
+                session.SetMyBookings(bookings);
+                cookies.SetMyBookings(bookings);
                 TempData["Message"] = "Class booked successfully!";
             }
             else
             {
-                TempData["Message"] = "This class is already booked!";
+                TempData["Message"] = "You already booked this class.";
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new
+            {
+                club = session.GetActiveClub(),
+                category = session.GetActiveCategory()
+            });
         }
 
         public IActionResult ViewBookings()
         {
-            var bookings = HttpContext.Request.GetObjectFromJson<List<int>>(BookingCookieKey) ?? new List<int>();
-            var bookedClasses = _context.EquinoxClasses
+            var session = new EquinoxSession(HttpContext.Session);
+            var bookings = session.GetMyBookings() ?? new List<int>();
+
+            var bookedClasses = context.EquinoxClasses
                 .Include(c => c.Club)
                 .Include(c => c.ClassCategory)
                 .Include(c => c.User)
@@ -111,28 +166,32 @@ namespace Equinox.Controllers
                 .ToList();
 
             ViewBag.CartCount = bookings.Count;
+
             return View(bookedClasses);
         }
 
         [HttpPost]
-        public IActionResult CancelBooking(int id)
-        {
-            var bookings = HttpContext.Request.GetObjectFromJson<List<int>>(BookingCookieKey) ?? new List<int>();
-            bool exists = bookings.Contains(id);
+       public IActionResult CancelBooking(int id)
+       {
+         var session = new EquinoxSession(HttpContext.Session);
+         var cookies = new EquinoxCookie(Request.Cookies, Response.Cookies);
 
-            if (exists)
-            {
-                bookings.Remove(id);
-                HttpContext.Response.SetObjectAsJson(BookingCookieKey, bookings);
-                TempData["Message"] = "Booking canceled.";
-            }
-            else
-            {
-                TempData["Message"] = "No booking found to cancel.";
-            }
+          var bookings = session.GetMyBookings() ?? new List<int>();
 
-            return RedirectToAction("ViewBookings");
-        }
+     if (bookings.Contains(id))
+       {
+        bookings.Remove(id);
+        session.SetMyBookings(bookings);
+        cookies.SetMyBookings(bookings);
+        TempData["Message"] = "Booking canceled.";
+       }
+         else
+       {
+        TempData["Message"] = "No booking found to cancel.";
+       }
+
+    return RedirectToAction("ViewBookings");
+         }
 
         public IActionResult Contact() => View();
         public IActionResult Privacy() => View();

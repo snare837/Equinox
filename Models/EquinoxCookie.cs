@@ -1,40 +1,60 @@
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Text.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Equinox.Models
 {
-    public static class EquinoxCookie
+    public class EquinoxCookie
     {
-        public static void SetCookie(HttpResponse response, string key, string value, int days = 7)
+        private const string BookingKey = "MyBookings";
+        private const string Delimiter = "-";
+
+        private IRequestCookieCollection requestCookies;
+        private IResponseCookies responseCookies;
+
+        public EquinoxCookie(IRequestCookieCollection request)
         {
-            CookieOptions option = new CookieOptions
+            requestCookies = request;
+        }
+
+        public EquinoxCookie(IResponseCookies response)
+        {
+            responseCookies = response;
+        }
+
+        public EquinoxCookie(IRequestCookieCollection request, IResponseCookies response)
+        {
+            requestCookies = request;
+            responseCookies = response;
+        }
+
+        public void SetMyBookings(List<int> bookings)
+        {
+            string idString = string.Join(Delimiter, bookings);
+            CookieOptions options = new CookieOptions
             {
-                Expires = DateTime.Now.AddDays(days)
+                Expires = DateTime.Now.AddDays(7)
             };
-            response.Cookies.Append(key, value, option);
+            responseCookies.Append(BookingKey, idString, options);
         }
 
-        public static string? GetCookie(HttpRequest request, string key)
+        public List<int> GetMyBookings()
         {
-            request.Cookies.TryGetValue(key, out string? value);
-            return value;
+            if (requestCookies.TryGetValue(BookingKey, out string? idsString) && !string.IsNullOrEmpty(idsString))
+            {
+                return idsString.Split(Delimiter)
+                                .Select(id => int.TryParse(id, out int result) ? result : -1)
+                                .Where(id => id != -1)
+                                .ToList();
+            }
+
+            return new List<int>();
         }
 
-        public static void RemoveCookie(HttpResponse response, string key)
+        public void RemoveMyBookings()
         {
-            response.Cookies.Delete(key);
-        }
-        public static void SetObjectAsJson(this HttpResponse response, string key, object value, int days = 7)
-        {
-            var json = JsonSerializer.Serialize(value);
-            SetCookie(response, key, json, days);
-        }
-
-        public static T? GetObjectFromJson<T>(this HttpRequest request, string key)
-        {
-            var value = GetCookie(request, key);
-            return value == null ? default : JsonSerializer.Deserialize<T>(value);
+            responseCookies.Delete(BookingKey);
         }
     }
 }

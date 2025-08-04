@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Equinox.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,7 +19,8 @@ namespace Equinox.Migrations
                 {
                     ClassCategoryId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Image = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,7 +33,7 @@ namespace Equinox.Migrations
                 {
                     ClubId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     PhoneNumber = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -46,7 +47,7 @@ namespace Equinox.Migrations
                 {
                     UserId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     PhoneNumber = table.Column<string>(type: "TEXT", nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     DOB = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -115,12 +116,12 @@ namespace Equinox.Migrations
 
             migrationBuilder.InsertData(
                 table: "ClassCategories",
-                columns: new[] { "ClassCategoryId", "Name" },
+                columns: new[] { "ClassCategoryId", "Image", "Name" },
                 values: new object[,]
                 {
-                    { 1, "Yoga" },
-                    { 2, "HIIT" },
-                    { 3, "Boxing" }
+                    { 1, "", "Yoga" },
+                    { 2, "", "HIIT" },
+                    { 3, "", "Boxing" }
                 });
 
             migrationBuilder.InsertData(
@@ -149,7 +150,8 @@ namespace Equinox.Migrations
                 values: new object[,]
                 {
                     { 1, 1, "Monday", "yoga1.jpg", 1, "Morning Yoga", "8 AM – 9 AM", 1 },
-                    { 2, 2, "Wednesday", "pilates1.jpg", 2, "Evening Pilates", "6 PM – 7 PM", 2 }
+                    { 2, 2, "Wednesday", "pilates1.jpg", 2, "Evening Pilates", "6 PM – 7 PM", 2 },
+                    { 3, 3, "Friday", "boxing1.jpg", 3, "Boxing Basics", "5 PM – 6 PM", 3 }
                 });
 
             migrationBuilder.CreateIndex(

@@ -1,0 +1,44 @@
+@model List<Equinox.Models.ClassCategory>
+
+@{
+    ViewBag.Title = "Manage Class Category";
+}
+
+<h2>Manage Class Category</h2>
+
+<a asp-action="AddClassCategory" class="btn btn-primary mb-3">Add ClassCategory</a>
+
+@if (Model.Count == 0)
+{
+    <p>No class categories exist.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ClassCategoryId</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.ClassCategoryId</td>
+                    <td>@item.Name</td>
+                    <td>
+                        <a asp-action="EditClassCategory" asp-route-id="@item.ClassCategoryId" class="btn btn-warning btn-sm me-2">Edit</a>
+                        <form asp-action="DeleteClassCategory" method="post">
+                            <input type="hidden" name="id" value="@item.ClassCategoryId" />
+                            <button type="submit" class="btn btn-secondary btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="index" asp-controller="Home" class="btn btn-outline-primary">Back to Admin page</a>

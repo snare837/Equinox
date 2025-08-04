@@ -1,87 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>@ViewData["Title"] - Equinox</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
-</head>
-<body>
-    <!-- ✅ Navbar -->
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" asp-controller="Home" asp-action="Index">Equinox</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Club" asp-action="List">Clubs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Class" asp-action="List">Classes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Membership" asp-action="List">Membership</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="PrivateClass" asp-action="List">Private Training</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="ViewBookings">
-                            Bookings
-                            @if (ViewBag.CartCount != null && (int)ViewBag.CartCount > 0)
-                            {
-                                <span class="badge bg-danger ms-1">@ViewBag.CartCount</span>
-                            }
-                            <i class="fas fa-shopping-cart ms-1"></i>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <main class="container mt-4">
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-info text-center fade show mt-3" id="tempDataMessage">
-            @TempData["Message"]
-        </div>
-    }
+@{
+    Layout = "_Layout";
+}
 
+<nav class="navbar navbar-expand-md navbar-light bg-light mb-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" asp-controller="Home" asp-action="Index">Equinox</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" asp-controller="Club" asp-action="List">Clubs</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Class" asp-action="List">Classes</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Membership" asp-action="List">Membership</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="PrivateClass" asp-action="List">Private Training</a></li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="ViewBookings">
+                        Bookings
+                        @if (ViewBag.CartCount != null && (int)ViewBag.CartCount > 0)
+                        {
+                            <span class="badge bg-danger ms-1">@ViewBag.CartCount</span>
+                        }
+                        <i class="fas fa-shopping-cart ms-1"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info text-center fade show mt-3" id="tempDataMessage">
+        @TempData["Message"]
+    </div>
+}
+
+<main class="container mt-4">
     @RenderBody()
 </main>
 
-    <!-- ✅ Footer -->
-    <footer class="text-center mt-4 mb-3">
-        <a asp-action="Contact">Contact us</a> |
-        <a asp-action="Privacy">Privacy Policy</a> |
-        <a asp-action="Terms">Terms & Conditions</a> |
-        <a asp-action="CookiePolicy">Cookies</a>
-    </footer>
+<footer class="text-center mt-4 mb-3">
+    <a asp-action="Contact">Contact us</a> |
+    <a asp-action="Privacy">Privacy Policy</a> |
+    <a asp-action="Terms">Terms & Conditions</a> |
+    <a asp-action="CookiePolicy">Cookies</a>
+</footer>
 
-    <!-- ✅ Scripts -->
-        <!-- ✅ Scripts -->
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        window.onload = function () {
-            const msg = document.getElementById('tempDataMessage');
-            if (msg) {
-                setTimeout(() => {
-                    msg.style.display = 'none';
-                }, 4000);
-            }
-        };
-    </script>
-</body>
-</html>
-
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    window.onload = function () {
+        const msg = document.getElementById('tempDataMessage');
+        if (msg) {
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 4000);
+        }
+    };
+</script>

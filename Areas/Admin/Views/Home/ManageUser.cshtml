@@ -1,0 +1,51 @@
+@model List<Equinox.Models.User>
+
+@{
+    ViewBag.Title = "Manage User";
+}
+
+<h2>Manage User</h2>
+<a asp-action="AddUser" class="btn btn-primary mb-3">Add User</a>
+
+@if (Model.Count == 0)
+{
+    <p>No User exist.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>UserId</th>
+                <th>Name</th>
+                <th>PhoneNumber</th>
+                <th>Email</th>
+                <th>DOB</th>
+                <th>IsCoach</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.UserId</td>
+                    <td>@item.Name</td>
+                    <td>@item.PhoneNumber</td>
+                    <td>@item.Email</td>
+                    <td>@item.DOB?.ToString("dd-MM-yyyy")</td>
+                    <td>@item.IsCoach</td>
+                    <td>
+                        <a asp-action="EditUser" asp-route-id="@item.UserId" class="btn btn-warning btn-sm me-2">Edit</a>
+                        <form asp-action="DeleteUser" method="post">
+                            <input type="hidden" name="id" value="@item.UserId" />
+                            <button type="submit" class="btn btn-secondary btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="index" asp-controller="Home" class="btn btn-outline-primary">Back to Admin page</a>
