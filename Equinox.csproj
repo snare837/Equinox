@@ -15,4 +15,13 @@
     </PackageReference>
 </ItemGroup>
 
+
+<ItemGroup>
+  <Content Include="equinox.db">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
+
+
+
 </Project>
