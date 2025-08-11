@@ -8,6 +8,9 @@ builder.Services.AddMemoryCache();          // Required for session
 builder.Services.AddSession();              // Basic session setup
 builder.Services.AddControllersWithViews(); // MVC
 
+var dbPath = Path.Combine(builder.Environment.ContentRootPath, "equinox.db");
+builder.Configuration["ConnectionStrings:EquinoxContext"] = $"Data Source={dbPath}";
+
 builder.Services.AddDbContext<EquinoxContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("EquinoxContext")));
 

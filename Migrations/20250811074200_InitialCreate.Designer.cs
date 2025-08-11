@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Equinox.Migrations
 {
     [DbContext(typeof(EquinoxContext))]
-    [Migration("20250811061054_Initial")]
-    partial class Initial
+    [Migration("20250811074200_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

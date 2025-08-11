@@ -15,12 +15,13 @@
     </PackageReference>
 </ItemGroup>
 
-
 <ItemGroup>
-  <Content Include="equinox.db">
+  <!-- Only copy the DB if it already exists, otherwise skip (prevents MSB3030) -->
+  <None Include="equinox.db" Condition="Exists('equinox.db')">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </Content>
+  </None>
 </ItemGroup>
+
 
 
 
