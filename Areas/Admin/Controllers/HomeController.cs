@@ -1,135 +1,129 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Equinox.Models;
-using Equinox.Models.ViewModels;
-using System.Linq;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System.Linq;
+using Equinox.Models;
+using Equinox.Models.DataLayer;
+using Equinox.Models.DataLayer.Repositories;
+
 
 namespace Equinox.Areas.Admin.Controllers
 {
-
     [Area("Admin")]
     [Route("Admin/[controller]/[action]")]
     public class HomeController : Controller
     {
         private readonly EquinoxContext _context;
+
+        private Repository<Club> clubData { get; set; }
+        private Repository<ClassCategory> categoryData { get; set; }
+        private Repository<User> coachData { get; set; }
+
         public HomeController(EquinoxContext context)
         {
-            _context = context;
+            _context = context;                       // used for booking guard checks
+            clubData = new Repository<Club>(context);
+            categoryData = new Repository<ClassCategory>(context);
+            coachData = new Repository<User>(context);
         }
+
         public IActionResult Index() => View();
 
-        public IActionResult ManageClub()
-        {
-            var clubs = _context.Clubs.ToList();
-            return View(clubs);
-        }
+        //  Lists (Repository + QueryOptions) 
+        public ViewResult ManageClub() =>
+            View(clubData.List(new QueryOptions<Club> { OrderBy = c => c.Name }));
 
+        public ViewResult ManageClassCategory() =>
+            View(categoryData.List(new QueryOptions<ClassCategory> { OrderBy = c => c.Name }));
 
-        public IActionResult ManageClassCategory()
-        {
-            var classCategories = _context.ClassCategories.ToList();
+        public ViewResult ManageUser() =>
+            View(coachData.List(new QueryOptions<User> { OrderBy = u => u.Name }));
 
-
-            return View(classCategories);
-        }
-
-        public IActionResult ManageUser()
-        {
-            var users = _context.Coaches.ToList();
-
-
-            return View(users);
-        }
-
-        [HttpPost]
-        public IActionResult DeleteClub(int id)
-        {
-            var club = _context.Clubs.FirstOrDefault(c => c.ClubId == id);
-            if (club == null)
-            {
-                return NotFound();
-            }
-
-            _context.Clubs.Remove(club);
-            _context.SaveChanges();
-
-            return RedirectToAction("ManageClub");
-        }
-
-        [HttpPost]
-        public IActionResult DeleteClassCategory(int id)
-        {
-            var classCategory = _context.ClassCategories.FirstOrDefault(c => c.ClassCategoryId == id);
-            if (classCategory == null)
-            {
-                return NotFound();
-            }
-
-            _context.ClassCategories.Remove(classCategory);
-            _context.SaveChanges();
-
-            return RedirectToAction("ManageClassCategory");
-        }
-
-        [HttpPost]
-        public IActionResult DeleteUser(int id)
-        {
-            var user = _context.Coaches.FirstOrDefault(u => u.UserId == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Coaches.Remove(user);
-            _context.SaveChanges();
-
-            return RedirectToAction("ManageUser");
-        }
-
+        //  Club 
         public IActionResult AddClub()
         {
             ViewBag.Action = "Add";
             return View("EditClub", new Club());
         }
 
-
         [HttpGet]
         public IActionResult EditClub(int id)
         {
             ViewBag.Action = "Edit";
-
-            var club = _context.Clubs.FirstOrDefault(c => c.ClubId == id);
-            if (club == null)
-            {
-                return NotFound();
-            }
-
-            return View("EditClub", club);
+            var club = clubData.Get(id);
+            return club == null ? NotFound() : View("EditClub", club);
         }
 
         [HttpPost]
         public IActionResult SaveClub(Club club)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                if (club.ClubId == 0)
-                {
-                    _context.Clubs.Add(club);
-                }
-                else
-                {
-                    _context.Clubs.Update(club);
-                }
-
-                _context.SaveChanges();
-                return RedirectToAction("ManageClub");
+                ViewBag.Action = club.ClubId == 0 ? "Add" : "Edit";
+                return View("EditClub", club);
             }
 
-            ViewBag.Action = club.ClubId == 0 ? "Add" : "Edit";
-            return View("EditClub", club);
+            if (club.ClubId == 0) clubData.Insert(club); else clubData.Update(club);
+            clubData.Save();
+            return RedirectToAction("ManageClub");
         }
 
+
+        [HttpPost]
+        public IActionResult DeleteClub(int id)
+        {
+            var club = clubData.Get(id);
+            if (club == null)
+            {
+                return NotFound();
+            }
+
+            var session = new EquinoxSession(HttpContext.Session);
+            var bookings = session.GetMyBookings() ?? new List<int>();
+
+            // Use repository and QueryOptions to get booked classes from session
+            var options = new QueryOptions<EquinoxClass>
+            {
+                Includes = "Club",
+                Where = c => bookings.Contains(c.EquinoxClassId)
+            };
+            var bookedClasses = new Repository<EquinoxClass>(_context).List(options).ToList();
+
+            // Check if any booked class belongs to this club
+            bool clubHasBookedClasses = bookedClasses.Any(c => c.ClubId == id);
+
+            if (clubHasBookedClasses)
+            {
+                TempData["message"] = $"Can't delete club '{club.Name}' because it has booked classes.";
+                return RedirectToAction("ManageClub", "Home", new { area = "Admin" });
+            }
+
+            // Get unbooked classes for this club
+            var allEquinoxClassRepo = new Repository<EquinoxClass>(_context);
+            var unbookedOptions = new QueryOptions<EquinoxClass>
+            {
+                Where = c => c.ClubId == id && !bookings.Contains(c.EquinoxClassId)
+            };
+            var unbookedClasses = allEquinoxClassRepo.List(unbookedOptions).ToList();
+
+            // Remove unbooked classes
+            foreach (var c in unbookedClasses)
+                allEquinoxClassRepo.Delete(c);
+
+            // Remove the club
+            clubData.Delete(club);
+
+            // Save all changes
+            clubData.Save();
+            allEquinoxClassRepo.Save();
+
+            TempData["message"] = $"{club.Name} removed from Clubs.";
+            return RedirectToAction("ManageClub", "Home", new { area = "Admin" });
+        }
+
+
+        //  Class Category 
         public IActionResult AddClassCategory()
         {
             ViewBag.Action = "Add";
@@ -140,37 +134,75 @@ namespace Equinox.Areas.Admin.Controllers
         public IActionResult EditClassCategory(int id)
         {
             ViewBag.Action = "Edit";
+            var category = categoryData.Get(id);
+            return category == null ? NotFound() : View("EditClassCategory", category);
+        }
 
-            var category = _context.ClassCategories.FirstOrDefault(c => c.ClassCategoryId == id);
+        [HttpPost]
+        public IActionResult SaveClassCategory(ClassCategory category)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Action = category.ClassCategoryId == 0 ? "Add" : "Edit";
+                return View("EditClassCategory", category);
+            }
+
+            if (category.ClassCategoryId == 0) categoryData.Insert(category); else categoryData.Update(category);
+            categoryData.Save();
+            return RedirectToAction("ManageClassCategory");
+        }
+
+        [HttpPost]
+        public IActionResult DeleteClassCategory(int id)
+        {
+            var category = categoryData.Get(id);
             if (category == null)
             {
                 return NotFound();
             }
 
-            return View("EditClassCategory", category);
-        }
-        [HttpPost]
-        public IActionResult SaveClassCategory(ClassCategory category)
-        {
-            if (ModelState.IsValid)
-            {
-                if (category.ClassCategoryId == 0)
-                {
-                    _context.ClassCategories.Add(category);
-                }
-                else
-                {
-                    _context.ClassCategories.Update(category);
-                }
+            var session = new EquinoxSession(HttpContext.Session);
+            var bookings = session.GetMyBookings() ?? new List<int>();
 
-                _context.SaveChanges();
-                return RedirectToAction("ManageClassCategory");
+            var equinoxClassRepo = new Repository<EquinoxClass>(_context);
+
+            // Get booked classes from session bookings that belong to this category
+            var bookedOptions = new QueryOptions<EquinoxClass>
+            {
+                Includes = "ClassCategory",
+                Where = c => bookings.Contains(c.EquinoxClassId)
+            };
+            var bookedClasses = equinoxClassRepo.List(bookedOptions).ToList();
+
+            if (bookedClasses.FirstOrDefault(c => c.ClassCategoryId == id) != null)
+            {
+                TempData["message"] = $"Cannot delete category '{category.Name}' because it has booked classes.";
+                return RedirectToAction("ManageClassCategory", "Home", new { area = "Admin" });
             }
 
-            ViewBag.Action = category.ClassCategoryId == 0 ? "Add" : "Edit";
-            return View("EditClassCategory", category);
+            // Get unbooked classes in this category
+            var unbookedOptions = new QueryOptions<EquinoxClass>
+            {
+                Where = c => c.ClassCategoryId == id && !bookings.Contains(c.EquinoxClassId)
+            };
+            var unbookedClasses = equinoxClassRepo.List(unbookedOptions).ToList();
+
+            foreach (var c in unbookedClasses)
+                equinoxClassRepo.Delete(c);
+
+            categoryData.Delete(category);
+
+            // Save changes
+            equinoxClassRepo.Save();
+            categoryData.Save();
+
+            TempData["message"] = $"{category.Name} removed from Categories.";
+            return RedirectToAction("ManageClassCategory", "Home", new { area = "Admin" });
         }
 
+
+
+        //  User / Coach 
         public IActionResult AddUser()
         {
             ViewBag.Action = "Add";
@@ -181,59 +213,74 @@ namespace Equinox.Areas.Admin.Controllers
         public IActionResult EditUser(int id)
         {
             ViewBag.Action = "Edit";
-
-            var user = _context.Coaches.FirstOrDefault(u => u.UserId == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View("EditUser", user);
+            var user = coachData.Get(id);
+            return user == null ? NotFound() : View("EditUser", user);
         }
 
         [HttpPost]
         public IActionResult SaveUser(User user)
         {
-            if (user.UserId == 0)
+            // keep your existing server-side checks if you have them; otherwise this is enough for Phase 4
+            if (!ModelState.IsValid)
             {
-
-                if (TempData["okPhoneNumber"] == null)
-                {
-                    string msg = Check.PhoneNumberExists(_context, user.PhoneNumber);
-                    if (!String.IsNullOrEmpty(msg))
-                    {
-                        ModelState.AddModelError(nameof(user.PhoneNumber), msg);
-                    }
-                }
-                if (TempData["okEmail"] == null)
-                {
-                    string msg = Check.EmailExists(_context, user.Email);
-                    if (!String.IsNullOrEmpty(msg))
-                    {
-                        ModelState.AddModelError(nameof(user.Email), msg);
-                    }
-                }
+                ViewBag.Action = user.UserId == 0 ? "Add" : "Edit";
+                return View("EditUser", user);
             }
-            if (ModelState.IsValid)
-                {
-                    if (user.UserId == 0)
-                    {
-                        _context.Coaches.Add(user);
-                    }
-                    else
-                    {
-                        _context.Coaches.Update(user);
-                    }
 
-                    _context.SaveChanges();
-                    return RedirectToAction("ManageUser");
-                }
-
-            ViewBag.Action = user.UserId == 0 ? "Add" : "Edit";
-            return View("EditUser", user);
+            if (user.UserId == 0) coachData.Insert(user); else coachData.Update(user);
+            coachData.Save();
+            return RedirectToAction("ManageUser");
         }
 
+        [HttpPost]
+        public IActionResult DeleteUser(int id)
+        {
+            var user = coachData.Get(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
+            var session = new EquinoxSession(HttpContext.Session);
+            var bookings = session.GetMyBookings() ?? new List<int>();
+
+            var equinoxClassRepo = new Repository<EquinoxClass>(_context);
+
+            // Get booked classes from session bookings that belong to this coach/user
+            var bookedOptions = new QueryOptions<EquinoxClass>
+            {
+                Includes = "User",
+                Where = c => bookings.Contains(c.EquinoxClassId)
+            };
+            var bookedClasses = equinoxClassRepo.List(bookedOptions).ToList();
+
+            bool coachHasBookedClasses = bookedClasses.Any(c => c.UserId == id);
+
+            if (coachHasBookedClasses)
+            {
+                TempData["message"] = $"Can't delete coach '{user.Name}' because they have booked classes.";
+                return RedirectToAction("ManageUser", "Home", new { area = "Admin" });
+            }
+
+            // Get unbooked classes for this coach/user
+            var unbookedOptions = new QueryOptions<EquinoxClass>
+            {
+                Where = c => c.UserId == id && !bookings.Contains(c.EquinoxClassId)
+            };
+            var unbookedClasses = equinoxClassRepo.List(unbookedOptions).ToList();
+
+            foreach (var c in unbookedClasses)
+                equinoxClassRepo.Delete(c);
+
+            coachData.Delete(user);
+
+            // Save changes
+            equinoxClassRepo.Save();
+            coachData.Save();
+
+            TempData["message"] = $"{user.Name} removed from Coaches.";
+            return RedirectToAction("ManageUser", "Home", new { area = "Admin" });
+        }
 
     }
 }

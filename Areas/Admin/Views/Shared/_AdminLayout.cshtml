@@ -27,6 +27,13 @@
     </div>
 </nav>
 
+@if (TempData["message"] != null)
+{
+    <div class="alert alert-warning text-center mb-0">
+        @TempData["message"]
+    </div>
+}
+
 <main class="container mt-4">
     @RenderBody()
 </main>

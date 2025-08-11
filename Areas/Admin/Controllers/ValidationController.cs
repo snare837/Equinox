@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Equinox.Models;
+using Equinox.Models.Util;  
 
 namespace Equinox.Areas.Admin.Controllers
 {

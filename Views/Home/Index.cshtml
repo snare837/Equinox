@@ -18,7 +18,7 @@
             <!-- Club Dropdown -->
             <div class="col-md-4">
                 <label for="club">Club:</label>
-                <select name="ActiveClubName" class="form-select" id="club">
+                <select name="club" class="form-select" id="club">
                     <option value="All" selected="@(Model.ActiveClubName == "All")">All</option>
                     @foreach (var club in Model.AllClubs)
                     {
@@ -32,7 +32,7 @@
             <!-- Category Dropdown -->
             <div class="col-md-4">
                 <label for="category">Category:</label>
-                <select name="ActiveCategoryName" class="form-select" id="category">
+                <select name="category" class="form-select" id="category">
                     <option value="All" selected="@(Model.ActiveCategoryName == "All")">All</option>
                     @foreach (var cat in Model.AllCategories)
                     {
@@ -60,8 +60,8 @@
                         <p class="card-text mb-4">
                             <strong>Day:</strong> @cls.ClassDay <br />
                             <strong>Time:</strong> @cls.Time <br />
-                            <strong>Club:</strong> @cls.Club.Name <br />
-                            <strong>Category:</strong> @cls.ClassCategory.Name
+                            <strong>Club:</strong> @cls.ClubName <br />
+                            <strong>Category:</strong> @cls.ClassCategoryName
                         </p>
                         <div class="mt-auto">
                          <a asp-action="Details" asp-controller="Home" asp-route-id="@cls.EquinoxClassId" class="btn btn-outline-primary w-100 mb-2">
