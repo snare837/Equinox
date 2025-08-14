@@ -11,8 +11,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Equinox.Migrations
 {
     [DbContext(typeof(EquinoxContext))]
+<<<<<<<< HEAD:Migrations/20250814212116_InitialCreate.Designer.cs
     [Migration("20250814212116_InitialCreate")]
     partial class InitialCreate
+========
+    [Migration("20250814213206_Initial")]
+    partial class Initial
+>>>>>>>> bd8db8d (Update ManageMembership):Migrations/20250814213206_Initial.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -208,6 +213,29 @@ namespace Equinox.Migrations
                     b.HasKey("MembershipId");
 
                     b.ToTable("Memberships");
+<<<<<<<< HEAD:Migrations/20250814212116_InitialCreate.Designer.cs
+========
+
+                    b.HasData(
+                        new
+                        {
+                            MembershipId = 1,
+                            Name = "Annual",
+                            Price = "1000"
+                        },
+                        new
+                        {
+                            MembershipId = 2,
+                            Name = "Monthly",
+                            Price = "100"
+                        },
+                        new
+                        {
+                            MembershipId = 3,
+                            Name = "PunchCard",
+                            Price = "10"
+                        });
+>>>>>>>> bd8db8d (Update ManageMembership):Migrations/20250814213206_Initial.Designer.cs
                 });
 
             modelBuilder.Entity("Equinox.Models.User", b =>

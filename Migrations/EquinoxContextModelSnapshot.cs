@@ -205,6 +205,26 @@ namespace Equinox.Migrations
                     b.HasKey("MembershipId");
 
                     b.ToTable("Memberships");
+
+                    b.HasData(
+                        new
+                        {
+                            MembershipId = 1,
+                            Name = "Annual",
+                            Price = "1000"
+                        },
+                        new
+                        {
+                            MembershipId = 2,
+                            Name = "Monthly",
+                            Price = "100"
+                        },
+                        new
+                        {
+                            MembershipId = 3,
+                            Name = "PunchCard",
+                            Price = "10"
+                        });
                 });
 
             modelBuilder.Entity("Equinox.Models.User", b =>

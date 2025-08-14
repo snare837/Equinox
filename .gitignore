@@ -490,3 +490,7 @@ equinox.db
 equinox.db-shm
 equinox.db-wal
 
+# SQLite
+*.db
+*.db-shm
+*.db-wal

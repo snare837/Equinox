@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Equinox.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -156,6 +156,16 @@ namespace Equinox.Migrations
                     { 1, new DateTime(2000, 3, 11, 0, 0, 0, 0, DateTimeKind.Unspecified), "johndoe@temp.com", true, "John Doe", "341-897-8129" },
                     { 2, new DateTime(1986, 6, 25, 0, 0, 0, 0, DateTimeKind.Unspecified), "janesmith@temp.com", true, "Jane Smith", "893-129-0910" },
                     { 3, new DateTime(1075, 8, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), "bettypage@demo.com", true, "Betty Page", "389-090-0010" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Memberships",
+                columns: new[] { "MembershipId", "Name", "Price" },
+                values: new object[,]
+                {
+                    { 1, "Annual", "1000" },
+                    { 2, "Monthly", "100" },
+                    { 3, "PunchCard", "10" }
                 });
 
             migrationBuilder.InsertData(
