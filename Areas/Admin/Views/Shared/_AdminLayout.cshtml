@@ -17,6 +17,9 @@
                     <li class="nav-item ms-3">
                         <a class="nav-link" asp-controller="Home" asp-action="ManageUser">Manage User</a>
                     </li>
+                    <li class="nav-item ms-3">
+        <a class="nav-link" asp-controller="Home" asp-action="ManageMembership">Manage Membership</a>
+    </li>
                 </ul>
         <!-- Right: Site link -->
         <ul class="navbar-nav ms-auto">
@@ -26,6 +29,13 @@
         </ul>
     </div>
 </nav>
+
+@if (TempData["message"] != null)
+{
+    <div class="alert alert-warning text-center mb-0">
+        @TempData["message"]
+    </div>
+}
 
 <main class="container mt-4">
     @RenderBody()

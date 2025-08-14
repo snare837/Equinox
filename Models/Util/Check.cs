@@ -1,4 +1,4 @@
-﻿namespace Equinox.Models
+﻿namespace Equinox.Models.Util
 {
     public static class Check
     {

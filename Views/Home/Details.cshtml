@@ -8,7 +8,8 @@
     <div class="row">
         <!-- Image -->
         <div class="col-md-6">
-            <img src="~/images/@Model.EquinoxClass.ClassPicture" class="img-fluid rounded shadow" alt="@Model.EquinoxClass.Name" />
+            <img src="~/images/@Model.EquinoxClass.ClassPicture" class="img-fluid rounded shadow"
+                alt="@Model.EquinoxClass.Name" />
         </div>
 
         <!-- Details -->
@@ -16,15 +17,19 @@
             <h2>@Model.EquinoxClass.Name</h2>
             <p><strong>Day:</strong> @Model.EquinoxClass.ClassDay</p>
             <p><strong>Time:</strong> @Model.EquinoxClass.Time</p>
-            <p><strong>Club:</strong> @Model.EquinoxClass.Club.Name</p>
-            <p><strong>Category:</strong> @Model.EquinoxClass.ClassCategory.Name</p>
-            <p><strong>Coach:</strong> @Model.EquinoxClass.User?.Name
+            <p><strong>Club:</strong> @Model.EquinoxClass.ClubName</p>
+            <p><strong>Category:</strong> @Model.EquinoxClass.ClassCategoryName</p>
+            <p><strong>Coach:</strong> @Model.EquinoxClass.UserName
 
 
-            <form asp-controller="Home" asp-action="BookClass" asp-route-id="@Model.EquinoxClass.EquinoxClassId" method="post">
-                <button type="submit" class="btn btn-primary mt-3">Book This Class</button>
+            <form asp-controller="Home" asp-action="BookClass" asp-route-id="@Model.EquinoxClass.EquinoxClassId"
+                method="post" class="d-inline">
+                <button type="submit" class="btn btn-primary mt-3 me-2">Book This Class</button>
             </form>
+
+            <a asp-action="Index" asp-controller="Home" class="btn btn-outline-primary mt-3">Back to Classes</a>
+
+
         </div>
     </div>
 </div>
-

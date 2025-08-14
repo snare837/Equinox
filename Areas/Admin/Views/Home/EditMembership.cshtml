@@ -1,0 +1,43 @@
+@using Equinox.Models
+@model Equinox.Models.Membership
+
+@{
+    string title = ViewBag.Action + " Membership";
+    ViewData["Title"] = title;
+}
+
+<h2>@title</h2>
+
+<form asp-action="SaveMembership" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input type="hidden" asp-for="MembershipId" />
+
+    <div class="row mb-2">
+        <label asp-for="Name" class="col-form-label col-md-2"></label>
+        <div class="col-md-4">
+            <input asp-for="Name" class="form-control" />
+        </div>
+        <div class="col">
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label asp-for="Price" class="col-form-label col-md-2"></label>
+        <div class="col-md-4">
+            <input asp-for="Price" class="form-control" />
+        </div>
+        <div class="col">
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="ManageMembership" asp-controller="Home" class="btn btn-secondary">Back</a>
+</form>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

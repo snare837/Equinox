@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Equinox.Migrations
 {
     [DbContext(typeof(EquinoxContext))]
-    [Migration("20250804073307_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250814205818_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -190,6 +190,26 @@ namespace Equinox.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Equinox.Models.Membership", b =>
+                {
+                    b.Property<int>("MembershipId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Price")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("MembershipId");
+
+                    b.ToTable("Memberships");
+                });
+
             modelBuilder.Entity("Equinox.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -265,19 +285,19 @@ namespace Equinox.Migrations
                     b.HasOne("Equinox.Models.ClassCategory", "ClassCategory")
                         .WithMany()
                         .HasForeignKey("ClassCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Equinox.Models.Club", "Club")
                         .WithMany()
                         .HasForeignKey("ClubId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Equinox.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ClassCategory");
