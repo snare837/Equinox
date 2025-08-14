@@ -484,7 +484,6 @@ $RECYCLE.BIN/
 *.swp
 
 equinox.db
-!equinox.db*
 
 equinox.db
 equinox.db-shm
